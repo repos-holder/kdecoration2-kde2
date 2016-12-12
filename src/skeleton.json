@@ -1,0 +1,16 @@
+{
+    "KPlugin": {
+        "Id": "org.kde.skeleton",
+        "ServiceTypes": [
+            "org.kde.kdecoration2"
+        ]
+    },
+    "org.kde.kdecoration2": {
+        "blur": true,
+        "kcmodule": false,
+
+        "themes": true,
+        "themeListKeyword": "themes",
+        "defaultTheme": "Skeleton"
+    }
+}
