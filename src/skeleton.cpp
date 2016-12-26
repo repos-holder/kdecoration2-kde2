@@ -245,8 +245,22 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     if (!client().data()->isMaximized()) {
         color.setAlphaF(0.9);
     }
+    painter->setRenderHints(0, false);
     painter->fillRect(m_frameRect, color);
     drawShadowRect(painter, m_frameRect);
+
+    // Obtain widget bounds.
+    QRect r(m_frameRect);
+    int x = r.x();
+    int y = r.y();
+    int x2 = r.width() - 1;
+    int y2 = r.height() - 1;
+    int w  = r.width();
+    int h  = r.height();
+
+    // Draw an outer black frame
+    painter->setPen(Qt::black);
+    painter->drawRect(x,y,w-1,h-1);
 
     QRectF clipRect = painter->clipBoundingRect();
     if (clipRect.isEmpty() || clipRect.intersects(m_captionRect)) {
