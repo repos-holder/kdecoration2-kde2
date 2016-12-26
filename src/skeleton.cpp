@@ -263,7 +263,20 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
 
     QPalette g = client().data()->palette();
     QColor c2 = client().data()->color(colorGroup, KDecoration2::ColorRole::Frame);
+    int leftFrameStart = m_captionRect.height()+26;
 
+    // left side
+    painter->setPen(c2);
+    QPolygon a;
+    QBrush brush( c2, Qt::SolidPattern );
+    a.setPoints( 4, 0,            leftFrameStart+top,
+                    side, leftFrameStart,
+                    side, h,
+                    0,            h);
+    painter->drawPolygon( a );
+    QPainterPath path;
+    path.addPolygon(a);
+    painter->fillPath(path, brush);
     // right side
     painter->fillRect(w-side, 0,
                side, h,
