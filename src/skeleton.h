@@ -68,6 +68,8 @@ private:
     QRect m_captionRect;
     KDecoration2::DecorationButtonGroup *m_leftButtons;
     KDecoration2::DecorationButtonGroup *m_rightButtons;
+
+    int side, bottom, top;
 };
 
 class DecorationButton : public KDecoration2::DecorationButton

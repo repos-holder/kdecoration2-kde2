@@ -179,9 +179,9 @@ void Decoration::updateLayout()
     }
 
     int frame = settings()->fontMetrics().height() / 5;
-    int side = (isMaximized ? 0 : frame);
-    int bottom = (isMaximized ? 0 : frame);
-    int top = (isMaximized ? 0 : frame);
+    side = 10; //(isMaximized ? 0 : frame);
+    bottom = 10; //(isMaximized ? 0 : frame);
+    top = 10; //(isMaximized ? 0 : frame);
     int titleHeight = qRound(1.25 * settings()->fontMetrics().height());
     setBorders(QMargins(side, titleHeight + top, side, (client().data()->isShaded() ? 0 : bottom)));
 
@@ -260,9 +260,15 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     int w  = r.width();
     int h  = r.height();
 
+    QPalette g = client().data()->palette();
+
     // Draw an outer black frame
     painter->setPen(Qt::black);
     painter->drawRect(x,y,w-1,h-1);
+
+    // Draw a frame around the wrapped widget.
+    painter->setPen( g.color( QPalette::Dark ) );
+    painter->drawRect( x+side-1,y+m_captionRect.height()-1,w-2*side+1,h-m_captionRect.height()-bottom+1 );
 
     QRectF clipRect = painter->clipBoundingRect();
     if (clipRect.isEmpty() || clipRect.intersects(m_captionRect)) {
