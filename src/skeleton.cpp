@@ -264,6 +264,11 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     QPalette g = client().data()->palette();
     QColor c2 = client().data()->color(colorGroup, KDecoration2::ColorRole::Frame);
 
+    // right side
+    painter->fillRect(w-side, 0,
+               side, h,
+               c2 );
+
     // Draw the bottom handle if required
     if (!client().data()->isMaximized())
     {
