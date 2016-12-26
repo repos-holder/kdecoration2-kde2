@@ -254,10 +254,6 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
 
     // Obtain widget bounds.
     QRect r(m_frameRect);
-    int x = r.x();
-    int y = r.y();
-    int x2 = r.width() - 1;
-    int y2 = r.height() - 1;
     int w  = r.width();
     int h  = r.height();
 
