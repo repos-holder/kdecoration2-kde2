@@ -277,6 +277,9 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     QPainterPath path;
     path.addPolygon(a);
     painter->fillPath(path, brush);
+    // Finish drawing the titlebar extension
+    painter->setPen(Qt::black);
+    painter->drawLine(0, leftFrameStart+top, side, leftFrameStart);
     // right side
     painter->fillRect(w-side, 0,
                side, h,
