@@ -285,6 +285,12 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
                side, h,
                c2 );
 
+    // Fill with frame color behind RHS buttons
+    painter->fillRect( m_rightButtons->geometry().x(), 0, m_rightButtons->geometry().width(), m_captionRect.height(), c2);
+    // Draw titlebar colour separator line
+    painter->setPen(g.color( QPalette::Dark ));
+    painter->drawLine(m_rightButtons->geometry().x()-1, 0, m_rightButtons->geometry().x()-1, m_captionRect.height());
+
     // Draw the bottom handle if required
     if (!client().data()->isMaximized())
     {
