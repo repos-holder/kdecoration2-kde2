@@ -247,9 +247,8 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     if (!client().data()->isMaximized()) {
         color.setAlphaF(0.9);
     }
-    painter->setRenderHints(0, false);
+    painter->setRenderHints(QPainter::Antialiasing, false);
     painter->fillRect(m_frameRect, color);
-    drawShadowRect(painter, m_frameRect);
 
     // Obtain widget bounds.
     QRect r(m_frameRect);
@@ -261,14 +260,19 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     int h  = r.height();
 
     QPalette g = client().data()->palette();
+    QColor c2 = client().data()->color(colorGroup, KDecoration2::ColorRole::Frame);
+
+    painter->fillRect(0, h-bottom, w, bottom, c2);
+
+    drawShadowRect(painter, m_frameRect);
 
     // Draw an outer black frame
     painter->setPen(Qt::black);
-    painter->drawRect(x,y,w-1,h-1);
+    painter->drawRect(0,0,w-1,h-1);
 
     // Draw a frame around the wrapped widget.
     painter->setPen( g.color( QPalette::Dark ) );
-    painter->drawRect( x+side-1,y+m_captionRect.height()-1,w-2*side+1,h-m_captionRect.height()-bottom+1 );
+    painter->drawRect( side-1,m_captionRect.height()-1,w-2*side+1,h-m_captionRect.height()-bottom+1 );
 
     QRectF clipRect = painter->clipBoundingRect();
     if (clipRect.isEmpty() || clipRect.intersects(m_captionRect)) {
