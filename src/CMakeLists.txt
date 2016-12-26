@@ -7,6 +7,7 @@ add_library(skeleton_decoration MODULE ${skeleton_decoration_SOURCES})
 target_link_libraries(skeleton_decoration
     Qt5::Core
     Qt5::Gui
+    Qt5::Widgets
     KF5::CoreAddons
     KDecoration2::KDecoration
 )

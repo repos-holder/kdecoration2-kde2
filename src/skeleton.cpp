@@ -36,6 +36,8 @@
 #include <QPainter>
 #include <QPropertyAnimation>
 
+#include <QtWidgets/qdrawutil.h>
+
 K_PLUGIN_FACTORY_WITH_JSON(SkeletonDecorationFactory,
     "skeleton.json",
     registerPlugin<Skeleton::Decoration>();
@@ -262,7 +264,22 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     QPalette g = client().data()->palette();
     QColor c2 = client().data()->color(colorGroup, KDecoration2::ColorRole::Frame);
 
-    painter->fillRect(0, h-bottom, w, bottom, c2);
+    // Draw the bottom handle if required
+    if (!client().data()->isMaximized())
+    {
+        int grabWidth = 2*side+12;
+            qDrawShadePanel(painter, 0, h-bottom+1, grabWidth, bottom,
+                            g, false, 1, &g.brush(QPalette::Mid));
+            qDrawShadePanel(painter, grabWidth, h-bottom+1, w-2*grabWidth, bottom,
+                            g, false, 1, client().data()->isActive() ?
+                            &g.brush(QPalette::Background) :
+                            &g.brush(QPalette::Mid));
+            qDrawShadePanel(painter, w-grabWidth, h-bottom+1, grabWidth, bottom,
+                            g, false, 1, &g.brush(QPalette::Mid));
+    } else
+        {
+            painter->fillRect(0, h-bottom, w, bottom, c2);
+        }
 
     drawShadowRect(painter, m_frameRect);
 
