@@ -223,14 +223,16 @@ void Decoration::createShadow()
 
 static void drawShadowRect(QPainter *p, const QRect &rect)
 {
+    int margin = 2;
+
     QRect r;
-    r = rect; r.setHeight(1);
+    r = rect; r.setHeight(margin);
     p->fillRect(r, QColor(255, 255, 255, 70));
-    r = rect; r.setWidth(1); r.setTop(r.top() + 1);
+    r = rect; r.setWidth(margin); r.setTop(r.top() + margin);
     p->fillRect(r, QColor(255, 255, 255, 70));
-    r = rect; r.setLeft(r.width() - 1); r.setBottom(r.bottom() - 1);
+    r = rect; r.setLeft(r.width() - margin); r.setBottom(r.bottom() - margin);
     p->fillRect(r, QColor(0, 0, 0, 50));
-    r = rect; r.setTop(r.height() - 1);
+    r = rect; r.setTop(r.height() - margin);
     p->fillRect(r, QColor(0, 0, 0, 50));
 }
 
