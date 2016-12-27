@@ -225,6 +225,8 @@ Decoration::Decoration(QObject *parent, const QVariantList &args)
     }
 
     titlePix = NULL;
+    rightBtnUpPix[true]     = NULL;
+    rightBtnDownPix[true] = NULL;
 
     // Set the sticky pin pixmaps;
     QPalette g;
@@ -249,6 +251,12 @@ Decoration::Decoration(QObject *parent, const QVariantList &args)
 
 Decoration::~Decoration()
 {
+    // Free button pixmaps
+    if (rightBtnUpPix[true])
+        delete rightBtnUpPix[true];
+    if(rightBtnDownPix[true])
+        delete rightBtnDownPix[true];
+
     // Title images
     if (titlePix)
         delete titlePix;
@@ -329,6 +337,20 @@ void Decoration::updateButtons()
     buttons.append(m_rightButtons->buttons());
 
     buttonSize = settings()->fontMetrics().height();
+
+    if (rightBtnUpPix[true])
+        delete rightBtnUpPix[true];
+    if(rightBtnDownPix[true])
+        delete rightBtnDownPix[true];
+
+    // Cache all possible button states
+    rightBtnUpPix[true]     = new QPixmap(buttonSize, buttonSize);
+    rightBtnDownPix[true] = new QPixmap(buttonSize, buttonSize);
+
+    // Draw the button state pixmaps
+    QPalette g = client().data()->palette(); //g = options()->palette( ColorButtonBg, true );
+    drawButtonBackground( rightBtnUpPix[true], g, false );
+    drawButtonBackground( rightBtnDownPix[true], g, true );
 
     for (int i = 0; i < buttons.size(); ++i) {
         DecorationButton *button = qobject_cast<DecorationButton *>(buttons.at(i));
@@ -625,13 +647,12 @@ void DecorationButton::paint(QPainter *painter, const QRect &/*repaintArea*/)
     if (type() == KDecoration2::DecorationButtonType::Menu) {
         decoration()->client().data()->icon().paint(painter, geometry().toRect());
     } else {
-        QColor buttonColor(100, 100, 100);
-        if (type() == KDecoration2::DecorationButtonType::Close) {
-            buttonColor = QColor(150, 100, 100);
-        } else if (isCheckable() && isChecked()) {
-            buttonColor = QColor(150, 150, 100);
-        }
-        painter->fillRect(geometry().adjusted(1, 1, -1, -1), buttonColor);
+        // Fill the button background with an appropriate button image
+        QPixmap btnbg;
+
+        btnbg = isPressed() ? *d->rightBtnDownPix[true] : *d->rightBtnUpPix[true];
+
+        painter->drawPixmap( geometry().x(), geometry().y(), btnbg );
     }
 
     if (type() == KDecoration2::DecorationButtonType::OnAllDesktops) {
@@ -641,7 +662,6 @@ void DecorationButton::paint(QPainter *painter, const QRect &/*repaintArea*/)
 
         painter->drawPixmap(geometry().x()+geometry().width()/2-8, geometry().y()+geometry().height()/2-8, btnpix);
     }
-
     if (isPressed()) {
         painter->fillRect(geometry(), QColor(0, 0, 0, 50));
     } else {

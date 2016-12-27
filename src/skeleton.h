@@ -69,12 +69,14 @@ private:
     KDecoration2::DecorationButtonGroup *m_leftButtons;
     KDecoration2::DecorationButtonGroup *m_rightButtons;
 
+public:
     int side, bottom, top;
     int buttonSize;
-public:
     QPixmap* pinDownPix;
     QPixmap* pinUpPix;
     QPixmap* titlePix;
+    QPixmap* rightBtnUpPix[2];
+    QPixmap* rightBtnDownPix[2];
 };
 
 class DecorationButton : public KDecoration2::DecorationButton
