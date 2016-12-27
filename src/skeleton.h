@@ -95,6 +95,9 @@ private:
 private:
     QPointer<QPropertyAnimation> m_hoverAnimation;
     qreal m_hoverProgress;
+
+    void setBitmap(const unsigned char *bitmap);
+    QPainterPath* deco;
 };
 
 class ThemeLister : public QObject
