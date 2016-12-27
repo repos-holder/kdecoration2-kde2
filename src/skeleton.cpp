@@ -224,6 +224,8 @@ Decoration::Decoration(QObject *parent, const QVariantList &args)
         }
     }
 
+    titlePix = NULL;
+
     // Set the sticky pin pixmaps;
     QPalette g;
     QPainter p;
@@ -247,6 +249,10 @@ Decoration::Decoration(QObject *parent, const QVariantList &args)
 
 Decoration::~Decoration()
 {
+    // Title images
+    if (titlePix)
+        delete titlePix;
+
     // Sticky pin images
     if (pinUpPix)
         delete pinUpPix;
@@ -348,7 +354,7 @@ void Decoration::updateButtons()
         default:
             break;
         }
-        button->setGeometry(QRect(0, 0, 16, 16));
+        button->setGeometry(QRect(0, 0, buttonSize, buttonSize));
     }
 
     updateLayout();
@@ -378,6 +384,36 @@ void Decoration::updateLayout()
 
     int left = m_leftButtons->geometry().x() + m_leftButtons->geometry().width();
     m_captionRect = QRect(left, 0, m_rightButtons->geometry().x() - left, titleHeight + top);
+
+    if (titlePix)
+        delete titlePix;
+
+    // Make the titlebar stipple
+        QPainter p;
+        QPainter maskPainter;
+        int i, x, y;
+        titlePix = new QPixmap(132, m_captionRect.height());
+        titlePix->fill( Qt::transparent );
+
+        QBitmap mask(132, m_captionRect.height());
+        mask.fill(Qt::color0);
+
+        p.begin(titlePix);
+        maskPainter.begin(&mask);
+        maskPainter.setPen(Qt::color1);
+        for(i=0, y=2; i < 9; ++i, y+=4)
+            for(x=1; x <= 132; x+=3)
+            {
+                p.setPen(client().data()->color(KDecoration2::ColorGroup::Active, KDecoration2::ColorRole::TitleBar).light(150));
+                p.drawPoint(x, y);
+                maskPainter.drawPoint(x, y);
+                p.setPen(client().data()->color(KDecoration2::ColorGroup::Active, KDecoration2::ColorRole::TitleBar).dark(150));
+                p.drawPoint(x+1, y+1);
+                maskPainter.drawPoint(x+1, y+1);
+            }
+        maskPainter.end();
+        p.end();
+        titlePix->setMask(mask);
 }
 
 void Decoration::createShadow()
@@ -466,9 +502,6 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
 
     // Fill with frame color behind RHS buttons
     painter->fillRect( m_rightButtons->geometry().x(), 0, m_rightButtons->geometry().width(), m_captionRect.height(), c2);
-    // Draw titlebar colour separator line
-    painter->setPen(g.color( QPalette::Dark ));
-    painter->drawLine(m_rightButtons->geometry().x()-1, 0, m_rightButtons->geometry().x()-1, m_captionRect.height());
 
     // Draw the bottom handle if required
     if (!client().data()->isMaximized())
@@ -487,16 +520,6 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
             painter->fillRect(0, h-bottom, w, bottom, c2);
         }
 
-    drawShadowRect(painter, m_frameRect);
-
-    // Draw an outer black frame
-    painter->setPen(Qt::black);
-    painter->drawRect(0,0,w-1,h-1);
-
-    // Draw a frame around the wrapped widget.
-    painter->setPen( g.color( QPalette::Dark ) );
-    painter->drawRect( side-1,m_captionRect.height()-1,w-2*side+1,h-m_captionRect.height()-bottom+1 );
-
     QRectF clipRect = painter->clipBoundingRect();
     if (clipRect.isEmpty() || clipRect.intersects(m_captionRect)) {
         QRect captionRect = m_captionRect.adjusted(4, 0, -4, 0);
@@ -506,7 +529,30 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
         painter->setPen(client().data()->color(colorGroup, KDecoration2::ColorRole::Foreground));
         painter->setFont(settings()->font());
         painter->drawText(captionRect, Qt::AlignVCenter, caption);
+
+    // Draw the titlebar stipple if active
+    if (client().data()->isActive())
+    {
+        QFontMetrics fm(settings()->font());
+        int captionWidth = fm.width(caption);
+        painter->drawTiledPixmap( m_captionRect.adjusted(captionWidth+4, 2, 0, 0), *titlePix );
     }
+
+    }
+
+    // Draw titlebar colour separator line
+    painter->setPen(g.color( QPalette::Dark ));
+    painter->drawLine(m_rightButtons->geometry().x()-1, 0, m_rightButtons->geometry().x()-1, m_captionRect.height());
+
+    drawShadowRect(painter, m_frameRect);
+
+    // Draw an outer black frame
+    painter->setPen(Qt::black);
+    painter->drawRect(0,0,w-1,h-1);
+
+    // Draw a frame around the wrapped widget.
+    painter->setPen( g.color( QPalette::Dark ) );
+    painter->drawRect( side-1,m_captionRect.height()-1,w-2*side+1,h-m_captionRect.height()-bottom+1 );
 
     m_leftButtons->paint(painter, repaintArea);
     m_rightButtons->paint(painter, repaintArea);

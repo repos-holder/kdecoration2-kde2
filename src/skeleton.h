@@ -74,6 +74,7 @@ private:
 public:
     QPixmap* pinDownPix;
     QPixmap* pinUpPix;
+    QPixmap* titlePix;
 };
 
 class DecorationButton : public KDecoration2::DecorationButton
