@@ -580,11 +580,11 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
 
     }
 
+    drawShadowRect(painter, m_frameRect);
+
     // Draw titlebar colour separator line
     painter->setPen(g.color( QPalette::Dark ));
     painter->drawLine(m_rightButtons->geometry().x()-1-sepRight, 0, m_rightButtons->geometry().x()-1-sepRight, m_captionRect.height());
-
-    drawShadowRect(painter, m_frameRect);
 
     // Draw an outer black frame
     painter->setPen(Qt::black);
