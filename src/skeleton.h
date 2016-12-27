@@ -70,7 +70,6 @@ private:
     KDecoration2::DecorationButtonGroup *m_rightButtons;
 
 public:
-    int side, bottom, top;
     int buttonSize;
     QPixmap* pinDownPix;
     QPixmap* pinUpPix;

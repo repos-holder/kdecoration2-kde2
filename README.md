@@ -1,4 +1,1 @@
-Skeleton window decoration
-==========================
-
-Minimal KWin decoration based on KDecoration2
+A quick port of "KDE 2" window decoration to KDE5

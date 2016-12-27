@@ -48,6 +48,21 @@ K_PLUGIN_FACTORY_WITH_JSON(SkeletonDecorationFactory,
 namespace Skeleton
 {
 
+// window border sizes
+int side = 4;
+int bottom = 8;
+int top = 1;
+// spacing above right buttons (+centering)
+int rbTop = 1;
+// skew separator degree (+top)
+int skew = 4;
+// spacing between separator and right buttons
+int sepRight = 2;
+// spacing above stipple start
+int stippleTop = 2;
+// grab handle width
+int grabWidth = 2*side+12+1;
+
 static const unsigned char iconify_bits[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x78, 0x00, 0x78, 0x00, 0x78, 0x00,
   0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -398,10 +413,7 @@ void Decoration::updateLayout()
         createShadow();
     }
 
-    int frame = settings()->fontMetrics().height() / 5;
-    side = 10; //(isMaximized ? 0 : frame);
-    bottom = 10; //(isMaximized ? 0 : frame);
-    top = 10; //(isMaximized ? 0 : frame);
+    //int frame = settings()->fontMetrics().height() / 5;
     int titleHeight = qRound(1.25 * settings()->fontMetrics().height());
     setBorders(QMargins(side, titleHeight + top, side, (client().data()->isShaded() ? 0 : bottom)));
 
@@ -409,7 +421,7 @@ void Decoration::updateLayout()
     setTitleBar(QRect(side, top, size().width() - 2 * side, borderTop()));
 
     m_leftButtons->setPos(QPointF(side, (titleHeight + top - buttonSize)/2));
-    m_rightButtons->setPos(QPointF(size().width() - m_rightButtons->geometry().width() - side, (titleHeight + top - buttonSize)/2));
+    m_rightButtons->setPos(QPointF(size().width() - m_rightButtons->geometry().width() - side, (titleHeight + top - buttonSize)/2+rbTop));
 
     int left = m_leftButtons->geometry().x() + m_leftButtons->geometry().width();
     m_captionRect = QRect(left, 0, m_rightButtons->geometry().x() - left, titleHeight + top);
@@ -513,7 +525,7 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     painter->setPen(c2);
     QPolygon a;
     QBrush brush( c2, Qt::SolidPattern );
-    a.setPoints( 4, 0,            leftFrameStart+top,
+    a.setPoints( 4, 0,            leftFrameStart+top+skew,
                     side, leftFrameStart,
                     side, h,
                     0,            h);
@@ -523,19 +535,18 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     painter->fillPath(path, brush);
     // Finish drawing the titlebar extension
     painter->setPen(Qt::black);
-    painter->drawLine(0, leftFrameStart+top, side, leftFrameStart);
+    painter->drawLine(0, leftFrameStart+top+skew, side, leftFrameStart);
     // right side
     painter->fillRect(w-side, 0,
                side, h,
                c2 );
 
     // Fill with frame color behind RHS buttons
-    painter->fillRect( m_rightButtons->geometry().x(), 0, m_rightButtons->geometry().width(), m_captionRect.height(), c2);
+    painter->fillRect( m_rightButtons->geometry().x()-sepRight, 0, m_rightButtons->geometry().width()+sepRight, m_captionRect.height(), c2);
 
     // Draw the bottom handle if required
     if (!client().data()->isMaximized())
     {
-        int grabWidth = 2*side+12;
             qDrawShadePanel(painter, 0, h-bottom+1, grabWidth, bottom,
                             g, false, 1, &g.brush(QPalette::Mid));
             qDrawShadePanel(painter, grabWidth, h-bottom+1, w-2*grabWidth, bottom,
@@ -564,14 +575,14 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     {
         QFontMetrics fm(settings()->font());
         int captionWidth = fm.width(caption);
-        painter->drawTiledPixmap( m_captionRect.adjusted(captionWidth+4, 2, 0, 0), *titlePix );
+        painter->drawTiledPixmap( m_captionRect.adjusted(captionWidth+4, stippleTop, -sepRight, 0), *titlePix );
     }
 
     }
 
     // Draw titlebar colour separator line
     painter->setPen(g.color( QPalette::Dark ));
-    painter->drawLine(m_rightButtons->geometry().x()-1, 0, m_rightButtons->geometry().x()-1, m_captionRect.height());
+    painter->drawLine(m_rightButtons->geometry().x()-1-sepRight, 0, m_rightButtons->geometry().x()-1-sepRight, m_captionRect.height());
 
     drawShadowRect(painter, m_frameRect);
 
