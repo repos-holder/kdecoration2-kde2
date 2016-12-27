@@ -70,6 +70,7 @@ private:
     KDecoration2::DecorationButtonGroup *m_rightButtons;
 
     int side, bottom, top;
+    int buttonSize;
 };
 
 class DecorationButton : public KDecoration2::DecorationButton

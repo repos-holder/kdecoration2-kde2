@@ -140,6 +140,8 @@ void Decoration::updateButtons()
     buttons.append(m_leftButtons->buttons());
     buttons.append(m_rightButtons->buttons());
 
+    buttonSize = settings()->fontMetrics().height();
+
     for (int i = 0; i < buttons.size(); ++i) {
         DecorationButton *button = qobject_cast<DecorationButton *>(buttons.at(i));
         switch (button->type()) {
@@ -164,8 +166,7 @@ void Decoration::updateButtons()
         default:
             break;
         }
-        const int buttonSize = settings()->fontMetrics().height();
-        button->setGeometry(QRect(0, 0, 16, 16));
+        button->setGeometry(QRect(0, 0, buttonSize, buttonSize));
     }
 
     updateLayout();
@@ -190,8 +191,8 @@ void Decoration::updateLayout()
     m_frameRect = QRect(0, 0, size().width(), size().height());
     setTitleBar(QRect(side, top, size().width() - 2 * side, borderTop()));
 
-    m_leftButtons->setPos(QPointF(side, (titleHeight + top)/2-8));
-    m_rightButtons->setPos(QPointF(size().width() - m_rightButtons->geometry().width() - side, (titleHeight + top)/2-8));
+    m_leftButtons->setPos(QPointF(side, (titleHeight + top - buttonSize)/2));
+    m_rightButtons->setPos(QPointF(size().width() - m_rightButtons->geometry().width() - side, (titleHeight + top - buttonSize)/2));
 
     int left = m_leftButtons->geometry().x() + m_leftButtons->geometry().width();
     m_captionRect = QRect(left, 0, m_rightButtons->geometry().x() - left, titleHeight + top);
