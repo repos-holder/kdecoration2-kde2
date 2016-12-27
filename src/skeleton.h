@@ -102,6 +102,7 @@ private:
     QPointer<QPropertyAnimation> m_hoverAnimation;
     qreal m_hoverProgress;
 
+public:
     void setBitmap(const unsigned char *bitmap);
     QPainterPath* deco;
     Decoration *d;

@@ -284,8 +284,8 @@ void Decoration::init()
 
     connect(client().data(), &KDecoration2::DecoratedClient::widthChanged, this, &Decoration::updateLayout);
     connect(client().data(), &KDecoration2::DecoratedClient::heightChanged, this, &Decoration::updateLayout);
-    connect(client().data(), &KDecoration2::DecoratedClient::maximizedChanged, this, &Decoration::updateLayout);
-    connect(client().data(), &KDecoration2::DecoratedClient::shadedChanged, this, &Decoration::updateLayout);
+    connect(client().data(), &KDecoration2::DecoratedClient::maximizedChanged, this, &Decoration::updateButtons);
+    connect(client().data(), &KDecoration2::DecoratedClient::shadedChanged, this, &Decoration::updateButtons);
 
     connect(client().data(), &KDecoration2::DecoratedClient::paletteChanged, this, [this]() { update(); });
     connect(client().data(), &KDecoration2::DecoratedClient::iconChanged, this, [this]() { update(); });
@@ -337,6 +337,8 @@ void Decoration::updateButtons()
     buttons.append(m_rightButtons->buttons());
 
     buttonSize = settings()->fontMetrics().height();
+    if (buttonSize < 16)
+        buttonSize = 16;
 
     if (rightBtnUpPix[true])
         delete rightBtnUpPix[true];
@@ -360,18 +362,23 @@ void Decoration::updateButtons()
             break;
         case KDecoration2::DecorationButtonType::Shade:
             button->setVisible(client().data()->isShadeable());
+        button->setBitmap( client().data()->isShaded() ? shade_on_bits : shade_off_bits );
             break;
         case KDecoration2::DecorationButtonType::ContextHelp:
             button->setVisible(client().data()->providesContextHelp());
+            button->setBitmap(question_bits);
             break;
         case KDecoration2::DecorationButtonType::Minimize:
             button->setVisible(client().data()->isMinimizeable());
+            button->setBitmap(iconify_bits);
             break;
         case KDecoration2::DecorationButtonType::Maximize:
             button->setVisible(client().data()->isMaximizeable());
+            button->setBitmap( client().data()->isMaximized() ? minmax_bits : maximize_bits );
             break;
         case KDecoration2::DecorationButtonType::Close:
             button->setVisible(client().data()->isCloseable());
+            button->setBitmap(close_bits);
             break;
         default:
             break;
@@ -647,25 +654,42 @@ void DecorationButton::paint(QPainter *painter, const QRect &/*repaintArea*/)
     if (type() == KDecoration2::DecorationButtonType::Menu) {
         decoration()->client().data()->icon().paint(painter, geometry().toRect());
     } else {
+
+    if (deco) {
         // Fill the button background with an appropriate button image
         QPixmap btnbg;
 
         btnbg = isPressed() ? *d->rightBtnDownPix[true] : *d->rightBtnUpPix[true];
 
         painter->drawPixmap( geometry().x(), geometry().y(), btnbg );
-    }
 
-    if (type() == KDecoration2::DecorationButtonType::OnAllDesktops) {
+    // If we have a decoration bitmap, then draw that
+    // otherwise we paint a sticky button.
+        // Select the appropriate button decoration color
+        bool darkDeco = qGray( decoration()->client().data()->color(
+                KDecoration2::ColorGroup::Active,
+                KDecoration2::ColorRole::Frame).rgb() ) > 127;
+
+        painter->setPen(Qt::NoPen);
+        if (m_hoverProgress)
+            painter->setBrush( darkDeco ? Qt::darkGray : Qt::lightGray );
+        else
+            painter->setBrush( darkDeco ? Qt::black : Qt::white );
+
+        QPoint offset(geometry().x()+(geometry().width()-10)/2, geometry().y()+(geometry().height()-10)/2);
+        if (isPressed())
+            offset += QPoint(1,1);
+        painter->translate(offset);
+        painter->drawPath(*deco);
+        painter->translate(-offset);
+    } else {
         QPixmap btnpix;
 
         btnpix = isChecked() ? *d->pinDownPix : *d->pinUpPix;
 
         painter->drawPixmap(geometry().x()+geometry().width()/2-8, geometry().y()+geometry().height()/2-8, btnpix);
     }
-    if (isPressed()) {
-        painter->fillRect(geometry(), QColor(0, 0, 0, 50));
-    } else {
-        painter->fillRect(geometry().adjusted(-2, -2, 2, 2), QColor(255, 255, 255, 100 * m_hoverProgress));
+
     }
 }
 
