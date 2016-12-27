@@ -223,10 +223,35 @@ Decoration::Decoration(QObject *parent, const QVariantList &args)
             Q_ASSERT(it.value().toString() == QLatin1String("Skeleton"));
         }
     }
+
+    // Set the sticky pin pixmaps;
+    QPalette g;
+    QPainter p;
+
+    // Active pins
+    g = client().data()->palette(); //g = options()->palette( ColorButtonBg, true );
+    QImage pinUpImg  = QImage(16, 16, QImage::Format_ARGB32_Premultiplied);
+    p.begin( &pinUpImg );
+    drawColorBitmaps( &p, g, 0, 0, 16, 16, pinup_white_bits, pinup_gray_bits, pinup_dgray_bits );
+    p.end();
+    pinUpPix = new QPixmap(QPixmap::fromImage(pinUpImg));
+    pinUpPix->setMask( QBitmap::fromData(QSize( 16, 16 ), pinup_mask_bits) );
+
+    QImage pinDownImg  = QImage(16, 16, QImage::Format_ARGB32_Premultiplied);
+    p.begin( &pinDownImg );
+    drawColorBitmaps( &p, g, 0, 0, 16, 16, pindown_white_bits, pindown_gray_bits, pindown_dgray_bits );
+    p.end();
+    pinDownPix = new QPixmap(QPixmap::fromImage(pinDownImg));
+    pinDownPix->setMask( QBitmap::fromData(QSize( 16, 16 ), pindown_mask_bits) );
 }
 
 Decoration::~Decoration()
 {
+    // Sticky pin images
+    if (pinUpPix)
+        delete pinUpPix;
+    if (pinDownPix)
+        delete pinDownPix;
 }
 
 void Decoration::init()
@@ -323,7 +348,7 @@ void Decoration::updateButtons()
         default:
             break;
         }
-        button->setGeometry(QRect(0, 0, buttonSize, buttonSize));
+        button->setGeometry(QRect(0, 0, 16, 16));
     }
 
     updateLayout();
@@ -499,6 +524,7 @@ DecorationButton::DecorationButton(KDecoration2::DecorationButtonType type, Deco
     connect(this, &KDecoration2::DecorationButton::hoveredChanged, this, [this](bool hovered) { startHoverAnimation(hovered ? 1.0 : 0.0); });
 
     deco        = NULL;
+    d = decoration;
 }
 
 DecorationButton::~DecorationButton()
@@ -560,6 +586,14 @@ void DecorationButton::paint(QPainter *painter, const QRect &/*repaintArea*/)
             buttonColor = QColor(150, 150, 100);
         }
         painter->fillRect(geometry().adjusted(1, 1, -1, -1), buttonColor);
+    }
+
+    if (type() == KDecoration2::DecorationButtonType::OnAllDesktops) {
+        QPixmap btnpix;
+
+        btnpix = isChecked() ? *d->pinDownPix : *d->pinUpPix;
+
+        painter->drawPixmap(geometry().x()+geometry().width()/2-8, geometry().y()+geometry().height()/2-8, btnpix);
     }
 
     if (isPressed()) {

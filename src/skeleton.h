@@ -71,6 +71,9 @@ private:
 
     int side, bottom, top;
     int buttonSize;
+public:
+    QPixmap* pinDownPix;
+    QPixmap* pinUpPix;
 };
 
 class DecorationButton : public KDecoration2::DecorationButton
@@ -98,6 +101,7 @@ private:
 
     void setBitmap(const unsigned char *bitmap);
     QPainterPath* deco;
+    Decoration *d;
 };
 
 class ThemeLister : public QObject
