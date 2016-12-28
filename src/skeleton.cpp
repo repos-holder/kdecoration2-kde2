@@ -450,7 +450,7 @@ void Decoration::updateLayout()
         p.begin(titlePix);
         maskPainter.begin(&mask);
         maskPainter.setPen(Qt::color1);
-        for(i=0, y=2; i < 9; ++i, y+=4)
+        for(i=0, y=2; i < m_captionRect.height()/4; ++i, y+=4)
             for(x=1; x <= 132; x+=3)
             {
                 p.setPen(client().data()->color(KDecoration2::ColorGroup::Active, KDecoration2::ColorRole::TitleBar).light(150));
