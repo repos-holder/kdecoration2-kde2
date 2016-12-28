@@ -421,7 +421,7 @@ void Decoration::updateLayout()
 
     //int frame = settings()->fontMetrics().height() / 5;
     int titleHeight = qRound(1.25 * settings()->fontMetrics().height());
-    setBorders(QMargins(side, titleHeight + top, side, (client().data()->isShaded() ? 0 : bottom)));
+    setBorders(QMargins(side, titleHeight + top, side, bottom));
 
     m_frameRect = QRect(0, 0, size().width(), size().height());
     setTitleBar(QRect(side, top, size().width() - 2 * side, borderTop()));
