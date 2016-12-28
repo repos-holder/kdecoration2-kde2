@@ -55,7 +55,7 @@ int top = 1;
 // skew separator degree (+top)
 int skew = 4;
 // spacing between separator and right buttons
-int sepRight = 2;
+int sepRight = 1;
 // spacing above stipple start
 int stippleTop = 2;
 // grab handle width
@@ -299,6 +299,8 @@ void Decoration::init()
     connect(client().data(), &KDecoration2::DecoratedClient::heightChanged, this, &Decoration::updateLayout);
     connect(client().data(), &KDecoration2::DecoratedClient::maximizedChanged, this, &Decoration::updateButtons);
     connect(client().data(), &KDecoration2::DecoratedClient::shadedChanged, this, &Decoration::updateButtons);
+    connect(client().data(), &KDecoration2::DecoratedClient::keepBelowChanged, this, &Decoration::updateButtons);
+    connect(client().data(), &KDecoration2::DecoratedClient::keepAboveChanged, this, &Decoration::updateButtons);
 
     connect(client().data(), &KDecoration2::DecoratedClient::paletteChanged, this, [this]() { update(); });
     connect(client().data(), &KDecoration2::DecoratedClient::iconChanged, this, [this]() { update(); });
@@ -375,7 +377,7 @@ void Decoration::updateButtons()
             break;
         case KDecoration2::DecorationButtonType::Shade:
             button->setVisible(client().data()->isShadeable());
-        button->setBitmap( client().data()->isShaded() ? shade_on_bits : shade_off_bits );
+            button->setBitmap( client().data()->isShaded() ? shade_on_bits : shade_off_bits );
             break;
         case KDecoration2::DecorationButtonType::ContextHelp:
             button->setVisible(client().data()->providesContextHelp());
@@ -392,6 +394,12 @@ void Decoration::updateButtons()
         case KDecoration2::DecorationButtonType::Close:
             button->setVisible(client().data()->isCloseable());
             button->setBitmap(close_bits);
+            break;
+        case KDecoration2::DecorationButtonType::KeepBelow:
+            button->setBitmap( client().data()->isKeepBelow() ? below_on_bits : below_off_bits );
+            break;
+        case KDecoration2::DecorationButtonType::KeepAbove:
+            button->setBitmap( client().data()->isKeepAbove() ? above_on_bits : above_off_bits );
             break;
         default:
             break;
@@ -691,7 +699,7 @@ void DecorationButton::paint(QPainter *painter, const QRect &/*repaintArea*/)
         painter->translate(offset);
         painter->drawPath(*deco);
         painter->translate(-offset);
-    } else {
+    } else if (type() == KDecoration2::DecorationButtonType::OnAllDesktops) {
         QPixmap btnpix;
 
         btnpix = isChecked() ? *d->pinDownPix : *d->pinUpPix;
