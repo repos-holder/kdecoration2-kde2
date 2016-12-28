@@ -52,8 +52,8 @@ namespace Skeleton
 int side = 4;
 int bottom = 8;
 int top = 1;
-// skew separator degree (+top)
-int skew = 4;
+// length of left titlebar extension
+int leftFrameOffset = 26-5;
 // spacing between separator and right buttons
 int sepRight = 1;
 // spacing above stipple start
@@ -421,6 +421,8 @@ void Decoration::updateLayout()
 
     //int frame = settings()->fontMetrics().height() / 5;
     int titleHeight = qRound(1.25 * settings()->fontMetrics().height());
+    if (titleHeight < 16)
+        titleHeight = 19;
     setBorders(QMargins(side, titleHeight + top, side, bottom));
 
     m_frameRect = QRect(0, 0, size().width(), size().height());
@@ -525,13 +527,13 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
 
     QPalette g = client().data()->palette();
     QColor c2 = client().data()->color(colorGroup, KDecoration2::ColorRole::Frame);
-    int leftFrameStart = m_captionRect.height()+26;
+    int leftFrameStart = m_captionRect.height()+leftFrameOffset;
 
     // left side
     painter->setPen(c2);
     QPolygon a;
     QBrush brush( c2, Qt::SolidPattern );
-    a.setPoints( 4, 0,            leftFrameStart+top+skew,
+    a.setPoints( 4, 0,            leftFrameStart+side,
                     side, leftFrameStart,
                     side, h,
                     0,            h);
@@ -541,7 +543,7 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     painter->fillPath(path, brush);
     // Finish drawing the titlebar extension
     painter->setPen(Qt::black);
-    painter->drawLine(0, leftFrameStart+top+skew, side, leftFrameStart);
+    painter->drawLine(0, leftFrameStart+side, side, leftFrameStart);
     // right side
     painter->fillRect(w-side, 0,
                side, h,
@@ -551,7 +553,7 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     painter->fillRect( m_rightButtons->geometry().x()-sepRight, 0, m_rightButtons->geometry().width()+sepRight, m_captionRect.height(), c2);
 
     // Draw the bottom handle if required
-    if (!client().data()->isMaximized())
+    if (1) //if (!client().data()->isMaximized())
     {
             qDrawShadePanel(painter, 0, h-bottom+1, grabWidth, bottom,
                             g, false, 1, &g.brush(QPalette::Mid));
