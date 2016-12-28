@@ -671,7 +671,7 @@ void DecorationButton::paint(QPainter *painter, const QRect &/*repaintArea*/)
 {
 //    KDecoration2::ColorGroup colorGroup = decoration()->client().data()->isActive() ? KDecoration2::ColorGroup::Active : KDecoration2::ColorGroup::Inactive;
     if (type() == KDecoration2::DecorationButtonType::Menu) {
-        decoration()->client().data()->icon().paint(painter, geometry().toRect());
+        decoration()->client().data()->icon().paint(painter, geometry().toRect().adjusted(0, 0, -1, -1));
     } else {
 
     if (deco) {
