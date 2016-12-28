@@ -1,6 +1,6 @@
 {
     "KPlugin": {
-        "Id": "org.kde.skeleton",
+        "Id": "org.kde.kde2",
         "ServiceTypes": [
             "org.kde.kdecoration2"
         ]
@@ -11,6 +11,6 @@
 
         "themes": true,
         "themeListKeyword": "themes",
-        "defaultTheme": "Skeleton"
+        "defaultTheme": "KDE 2"
     }
 }

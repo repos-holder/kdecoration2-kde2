@@ -2,9 +2,9 @@ set(skeleton_decoration_SOURCES
     skeleton.cpp
 )
 
-add_library(skeleton_decoration MODULE ${skeleton_decoration_SOURCES})
+add_library(kde2_decoration MODULE ${skeleton_decoration_SOURCES})
 
-target_link_libraries(skeleton_decoration
+target_link_libraries(kde2_decoration
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
@@ -12,5 +12,5 @@ target_link_libraries(skeleton_decoration
     KDecoration2::KDecoration
 )
 
-install(TARGETS skeleton_decoration DESTINATION ${PLUGIN_INSTALL_DIR}/org.kde.kdecoration2)
+install(TARGETS kde2_decoration DESTINATION ${PLUGIN_INSTALL_DIR}/org.kde.kdecoration2)
 

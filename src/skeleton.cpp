@@ -220,7 +220,7 @@ void DecorationButton::setBitmap(const unsigned char *bitmap)
 QVariantMap ThemeLister::themes() const
 {
     QVariantMap themes;
-    themes.insert(tr("Skeleton"), QStringLiteral("Skeleton"));
+    themes.insert(tr("KDE 2"), QStringLiteral("KDE 2"));
     return themes;
 }
 
@@ -233,7 +233,7 @@ Decoration::Decoration(QObject *parent, const QVariantList &args)
         QVariantMap map = args.at(0).toMap();
         QVariantMap::const_iterator it = map.constFind(QStringLiteral("theme"));
         if (it != map.constEnd()) {
-            Q_ASSERT(it.value().toString() == QLatin1String("Skeleton"));
+            Q_ASSERT(it.value().toString() == QLatin1String("KDE 2"));
         }
     }
 
