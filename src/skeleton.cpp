@@ -52,8 +52,6 @@ namespace Skeleton
 int side = 4;
 int bottom = 8;
 int top = 1;
-// spacing above right buttons (+centering)
-int rbTop = 1;
 // skew separator degree (+top)
 int skew = 4;
 // spacing between separator and right buttons
@@ -420,8 +418,8 @@ void Decoration::updateLayout()
     m_frameRect = QRect(0, 0, size().width(), size().height());
     setTitleBar(QRect(side, top, size().width() - 2 * side, borderTop()));
 
-    m_leftButtons->setPos(QPointF(side, (titleHeight + top - buttonSize)/2));
-    m_rightButtons->setPos(QPointF(size().width() - m_rightButtons->geometry().width() - side, (titleHeight + top - buttonSize)/2+rbTop));
+    m_leftButtons->setPos(QPointF(side, (titleHeight + top - buttonSize)/2+1));
+    m_rightButtons->setPos(QPointF(size().width() - m_rightButtons->geometry().width() - side, (titleHeight + top - buttonSize)/2+1));
 
     int left = m_leftButtons->geometry().x() + m_leftButtons->geometry().width();
     m_captionRect = QRect(left, 0, m_rightButtons->geometry().x() - left, titleHeight + top);
