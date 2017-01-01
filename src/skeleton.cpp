@@ -415,9 +415,11 @@ void Decoration::updateLayout()
     bool isMaximized = client().data()->isMaximized();
     setOpaque(isMaximized);
 
+#if 0
     if (!shadow().data()) {
         createShadow();
     }
+#endif
 
     //int frame = settings()->fontMetrics().height() / 5;
     int titleHeight = qRound(1.25 * settings()->fontMetrics().height());
