@@ -66,16 +66,20 @@ private Q_SLOTS:
 private:
     QRect m_frameRect;
     QRect m_captionRect;
+public:
     KDecoration2::DecorationButtonGroup *m_leftButtons;
     KDecoration2::DecorationButtonGroup *m_rightButtons;
 
 public:
+    void createPixmaps();
     int buttonSize;
     QPixmap* pinDownPix;
     QPixmap* pinUpPix;
     QPixmap* titlePix;
     QPixmap* rightBtnUpPix[2];
     QPixmap* rightBtnDownPix[2];
+    QPixmap* leftBtnUpPix[2];
+    QPixmap* leftBtnDownPix[2];
 };
 
 class DecorationButton : public KDecoration2::DecorationButton
@@ -105,6 +109,7 @@ public:
     void setBitmap(const unsigned char *bitmap);
     QPainterPath* deco;
     Decoration *d;
+    KDecoration2::DecorationButtonGroup *b;
 };
 
 class ThemeLister : public QObject

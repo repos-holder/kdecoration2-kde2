@@ -216,6 +216,35 @@ void DecorationButton::setBitmap(const unsigned char *bitmap)
 //      deco->setMask( *deco );
     }
 }
+void Decoration::createPixmaps()
+{
+    if (pinUpPix)
+        delete pinUpPix;
+    if (pinDownPix)
+        delete pinDownPix;
+
+    // Set the sticky pin pixmaps;
+    QPalette *g;
+    QPainter p;
+
+    // Active pins
+    g = new QPalette(client().data()->color(client().data()->isActive() ? KDecoration2::ColorGroup::Active : KDecoration2::ColorGroup::Inactive, KDecoration2::ColorRole::Frame));
+    QImage pinUpImg  = QImage(16, 16, QImage::Format_ARGB32_Premultiplied);
+    p.begin( &pinUpImg );
+    drawColorBitmaps( &p, *g, 0, 0, 16, 16, pinup_white_bits, pinup_gray_bits, pinup_dgray_bits );
+    p.end();
+    pinUpPix = new QPixmap(QPixmap::fromImage(pinUpImg));
+    pinUpPix->setMask( QBitmap::fromData(QSize( 16, 16 ), pinup_mask_bits) );
+
+    QImage pinDownImg  = QImage(16, 16, QImage::Format_ARGB32_Premultiplied);
+    p.begin( &pinDownImg );
+    drawColorBitmaps( &p, *g, 0, 0, 16, 16, pindown_white_bits, pindown_gray_bits, pindown_dgray_bits );
+    p.end();
+    pinDownPix = new QPixmap(QPixmap::fromImage(pinDownImg));
+    pinDownPix->setMask( QBitmap::fromData(QSize( 16, 16 ), pindown_mask_bits) );
+
+    delete g;
+}
 
 QVariantMap ThemeLister::themes() const
 {
@@ -240,26 +269,10 @@ Decoration::Decoration(QObject *parent, const QVariantList &args)
     titlePix = NULL;
     rightBtnUpPix[true]     = NULL;
     rightBtnDownPix[true] = NULL;
-
-    // Set the sticky pin pixmaps;
-    QPalette g;
-    QPainter p;
-
-    // Active pins
-    g = client().data()->palette(); //g = options()->palette( ColorButtonBg, true );
-    QImage pinUpImg  = QImage(16, 16, QImage::Format_ARGB32_Premultiplied);
-    p.begin( &pinUpImg );
-    drawColorBitmaps( &p, g, 0, 0, 16, 16, pinup_white_bits, pinup_gray_bits, pinup_dgray_bits );
-    p.end();
-    pinUpPix = new QPixmap(QPixmap::fromImage(pinUpImg));
-    pinUpPix->setMask( QBitmap::fromData(QSize( 16, 16 ), pinup_mask_bits) );
-
-    QImage pinDownImg  = QImage(16, 16, QImage::Format_ARGB32_Premultiplied);
-    p.begin( &pinDownImg );
-    drawColorBitmaps( &p, g, 0, 0, 16, 16, pindown_white_bits, pindown_gray_bits, pindown_dgray_bits );
-    p.end();
-    pinDownPix = new QPixmap(QPixmap::fromImage(pinDownImg));
-    pinDownPix->setMask( QBitmap::fromData(QSize( 16, 16 ), pindown_mask_bits) );
+    leftBtnUpPix[true]  = NULL;
+    leftBtnDownPix[true]    = NULL;
+    pinUpPix = NULL;
+    pinDownPix = NULL;
 }
 
 Decoration::~Decoration()
@@ -269,6 +282,11 @@ Decoration::~Decoration()
         delete rightBtnUpPix[true];
     if(rightBtnDownPix[true])
         delete rightBtnDownPix[true];
+
+    if (leftBtnUpPix[true])
+        delete leftBtnUpPix[true];
+    if(leftBtnDownPix[true])
+        delete leftBtnDownPix[true];
 
     // Title images
     if (titlePix)
@@ -297,15 +315,19 @@ void Decoration::init()
 
     connect(client().data(), &KDecoration2::DecoratedClient::widthChanged, this, &Decoration::updateLayout);
     connect(client().data(), &KDecoration2::DecoratedClient::heightChanged, this, &Decoration::updateLayout);
+    // change button pixmaps
     connect(client().data(), &KDecoration2::DecoratedClient::maximizedChanged, this, &Decoration::updateButtons);
     connect(client().data(), &KDecoration2::DecoratedClient::shadedChanged, this, &Decoration::updateButtons);
     connect(client().data(), &KDecoration2::DecoratedClient::keepBelowChanged, this, &Decoration::updateButtons);
     connect(client().data(), &KDecoration2::DecoratedClient::keepAboveChanged, this, &Decoration::updateButtons);
+    //
 
-    connect(client().data(), &KDecoration2::DecoratedClient::paletteChanged, this, [this]() { update(); });
+    // recolor button and pin icon backgrounds
+    connect(client().data(), &KDecoration2::DecoratedClient::paletteChanged, this, [this]() { update(); Decoration::updateButtons(); });
     connect(client().data(), &KDecoration2::DecoratedClient::iconChanged, this, [this]() { update(); });
     connect(client().data(), &KDecoration2::DecoratedClient::captionChanged, this, [this]() { update(m_captionRect); });
-    connect(client().data(), &KDecoration2::DecoratedClient::activeChanged, this, [this]() { update(); });
+    // recolor button and pin icon backgrounds
+    connect(client().data(), &KDecoration2::DecoratedClient::activeChanged, this, [this]() { update(); Decoration::updateButtons(); });
 
     createButtons();
     updateButtons();
@@ -359,15 +381,33 @@ void Decoration::updateButtons()
         delete rightBtnUpPix[true];
     if(rightBtnDownPix[true])
         delete rightBtnDownPix[true];
+    if (leftBtnUpPix[true])
+        delete leftBtnUpPix[true];
+    if(leftBtnDownPix[true])
+        delete leftBtnDownPix[true];
 
     // Cache all possible button states
+    leftBtnUpPix[true]  = new QPixmap(buttonSize, buttonSize);
+    leftBtnDownPix[true]    = new QPixmap(buttonSize, buttonSize);
+
     rightBtnUpPix[true]     = new QPixmap(buttonSize, buttonSize);
     rightBtnDownPix[true] = new QPixmap(buttonSize, buttonSize);
 
+    QPalette *g;
+    KDecoration2::ColorGroup colorGroup = (client().data()->isActive() ? KDecoration2::ColorGroup::Active : KDecoration2::ColorGroup::Inactive);
+
     // Draw the button state pixmaps
-    QPalette g = client().data()->palette(); //g = options()->palette( ColorButtonBg, true );
-    drawButtonBackground( rightBtnUpPix[true], g, false );
-    drawButtonBackground( rightBtnDownPix[true], g, true );
+    g = new QPalette(client().data()->color(colorGroup, KDecoration2::ColorRole::TitleBar));
+    drawButtonBackground( leftBtnUpPix[true], *g, false );
+    drawButtonBackground( leftBtnDownPix[true], *g, true );
+
+    delete g;
+
+    g = new QPalette(client().data()->color(colorGroup, KDecoration2::ColorRole::Frame));
+    drawButtonBackground( rightBtnUpPix[true], *g, false );
+    drawButtonBackground( rightBtnDownPix[true], *g, true );
+
+    delete g;
 
     for (int i = 0; i < buttons.size(); ++i) {
         DecorationButton *button = qobject_cast<DecorationButton *>(buttons.at(i));
@@ -408,6 +448,7 @@ void Decoration::updateButtons()
     }
 
     updateLayout();
+    createPixmaps();
 }
 
 void Decoration::updateLayout()
@@ -527,7 +568,8 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     int w  = r.width();
     int h  = r.height();
 
-    QPalette g = client().data()->palette();
+    QPalette *g = new QPalette(client().data()->color(colorGroup, KDecoration2::ColorRole::Frame));
+    QPalette *g2 = new QPalette(client().data()->color(colorGroup, KDecoration2::ColorRole::TitleBar));
     QColor c2 = client().data()->color(colorGroup, KDecoration2::ColorRole::Frame);
     int leftFrameStart = m_captionRect.height()+leftFrameOffset;
 
@@ -558,13 +600,13 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     if (1) //if (!client().data()->isMaximized())
     {
             qDrawShadePanel(painter, 0, h-bottom+1, grabWidth, bottom,
-                            g, false, 1, &g.brush(QPalette::Mid));
+                            *g, false, 1, &g->brush(QPalette::Mid));
             qDrawShadePanel(painter, grabWidth, h-bottom+1, w-2*grabWidth, bottom,
-                            g, false, 1, client().data()->isActive() ?
-                            &g.brush(QPalette::Background) :
-                            &g.brush(QPalette::Mid));
+                            *g, false, 1, client().data()->isActive() ?
+                            &g->brush(QPalette::Background) :
+                            &g->brush(QPalette::Mid));
             qDrawShadePanel(painter, w-grabWidth, h-bottom+1, grabWidth, bottom,
-                            g, false, 1, &g.brush(QPalette::Mid));
+                            *g, false, 1, &g->brush(QPalette::Mid));
     } else
         {
             painter->fillRect(0, h-bottom, w, bottom, c2);
@@ -593,7 +635,7 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     drawShadowRect(painter, m_frameRect);
 
     // Draw titlebar colour separator line
-    painter->setPen(g.color( QPalette::Dark ));
+    painter->setPen(g2->color( QPalette::Dark ));
     painter->drawLine(m_rightButtons->geometry().x()-1-sepRight, 0, m_rightButtons->geometry().x()-1-sepRight, m_captionRect.height());
 
     // Draw an outer black frame
@@ -601,8 +643,11 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     painter->drawRect(0,0,w-1,h-1);
 
     // Draw a frame around the wrapped widget.
-    painter->setPen( g.color( QPalette::Dark ) );
+    painter->setPen( g->color( QPalette::Dark ) );
     painter->drawRect( side-1,m_captionRect.height()-1,w-2*side+1,h-m_captionRect.height()-bottom+1 );
+
+    delete g;
+    delete g2;
 
     m_leftButtons->paint(painter, repaintArea);
     m_rightButtons->paint(painter, repaintArea);
@@ -621,6 +666,7 @@ DecorationButton::DecorationButton(KDecoration2::DecorationButtonType type, Deco
 
     deco        = NULL;
     d = decoration;
+    b = qobject_cast<KDecoration2::DecorationButtonGroup *>(parent);
 }
 
 DecorationButton::~DecorationButton()
@@ -671,7 +717,7 @@ void DecorationButton::startHoverAnimation(qreal endValue)
 
 void DecorationButton::paint(QPainter *painter, const QRect &/*repaintArea*/)
 {
-//    KDecoration2::ColorGroup colorGroup = decoration()->client().data()->isActive() ? KDecoration2::ColorGroup::Active : KDecoration2::ColorGroup::Inactive;
+    KDecoration2::ColorGroup colorGroup = decoration()->client().data()->isActive() ? KDecoration2::ColorGroup::Active : KDecoration2::ColorGroup::Inactive;
     if (type() == KDecoration2::DecorationButtonType::Menu) {
         decoration()->client().data()->icon().paint(painter, geometry().toRect());
     } else {
@@ -680,6 +726,9 @@ void DecorationButton::paint(QPainter *painter, const QRect &/*repaintArea*/)
         // Fill the button background with an appropriate button image
         QPixmap btnbg;
 
+    if (b == d->m_leftButtons)
+        btnbg = isPressed() ? *d->leftBtnDownPix[true] : *d->leftBtnUpPix[true];
+    else
         btnbg = isPressed() ? *d->rightBtnDownPix[true] : *d->rightBtnUpPix[true];
 
         painter->drawPixmap( geometry().x(), geometry().y(), btnbg );
@@ -688,8 +737,8 @@ void DecorationButton::paint(QPainter *painter, const QRect &/*repaintArea*/)
     // otherwise we paint a sticky button.
         // Select the appropriate button decoration color
         bool darkDeco = qGray( decoration()->client().data()->color(
-                KDecoration2::ColorGroup::Active,
-                KDecoration2::ColorRole::Frame).rgb() ) > 127;
+                colorGroup,
+                b == d->m_leftButtons ? KDecoration2::ColorRole::TitleBar : KDecoration2::ColorRole::Frame).rgb() ) > 127;
 
         painter->setPen(Qt::NoPen);
         if (m_hoverProgress)
