@@ -70,7 +70,6 @@ public:
     KDecoration2::DecorationButtonGroup *m_leftButtons;
     KDecoration2::DecorationButtonGroup *m_rightButtons;
 
-public:
     void createPixmaps();
     int buttonSize;
     QPixmap* pinDownPix;

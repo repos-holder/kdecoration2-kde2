@@ -50,7 +50,7 @@ namespace Skeleton
 
 // window border sizes
 int side = 4;
-int bottom = 8;
+int bottom_ = 8;
 int top = 1;
 // length of left titlebar extension
 int leftFrameOffset = 26-5;
@@ -463,6 +463,7 @@ void Decoration::updateLayout()
 #endif
 
     //int frame = settings()->fontMetrics().height() / 5;
+    int bottom = (isMaximized ? side : bottom_);
     int titleHeight = qRound(1.25 * settings()->fontMetrics().height());
     if (titleHeight < 16)
         titleHeight = 19;
@@ -572,6 +573,7 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     QPalette *g2 = new QPalette(client().data()->color(colorGroup, KDecoration2::ColorRole::TitleBar));
     QColor c2 = client().data()->color(colorGroup, KDecoration2::ColorRole::Frame);
     int leftFrameStart = m_captionRect.height()+leftFrameOffset;
+    int bottom = client().data()->isMaximized() ? side : bottom_;
 
     // left side
     painter->setPen(c2);
@@ -597,7 +599,7 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     painter->fillRect( m_rightButtons->geometry().x()-sepRight, 0, m_rightButtons->geometry().width()+sepRight, m_captionRect.height(), c2);
 
     // Draw the bottom handle if required
-    if (1) //if (!client().data()->isMaximized())
+    if (!client().data()->isMaximized())
     {
             qDrawShadePanel(painter, 0, h-bottom+1, grabWidth, bottom,
                             *g, false, 1, &g->brush(QPalette::Mid));
