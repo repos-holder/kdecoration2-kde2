@@ -656,6 +656,17 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
 
     m_leftButtons->paint(painter, repaintArea);
     m_rightButtons->paint(painter, repaintArea);
+
+    // remove corners
+    if (!client().data()->isMaximized())
+    {
+    painter->setPen(Qt::black);
+    painter->setCompositionMode(QPainter::CompositionMode_DestinationOut);
+    painter->drawPoint(0,0);
+    painter->drawPoint(w-1,0);
+    painter->drawPoint(w-1,h-1);
+    painter->drawPoint(0,h-1);
+    }
 }
 
 void Decoration::updateHoverAnimation(qreal /*hoverProgress*/, const QRect &updateRect)
