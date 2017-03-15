@@ -245,6 +245,10 @@ void Decoration::createPixmaps()
 
     delete g;
 }
+int getBottom(Decoration *d)
+{
+    return d->client().data()->isMaximized() ? side : bottom_;
+}
 
 QVariantMap ThemeLister::themes() const
 {
@@ -463,11 +467,10 @@ void Decoration::updateLayout()
 #endif
 
     //int frame = settings()->fontMetrics().height() / 5;
-    int bottom = (isMaximized ? side : bottom_);
     int titleHeight = qRound(1.25 * settings()->fontMetrics().height());
-    if (titleHeight < 16)
+    if (titleHeight < 19)
         titleHeight = 19;
-    setBorders(QMargins(side, titleHeight + top, side, bottom));
+    setBorders(QMargins(side, titleHeight + top, side, getBottom(this)));
 
     m_frameRect = QRect(0, 0, size().width(), size().height());
     setTitleBar(QRect(side, top, size().width() - 2 * side, borderTop()));
@@ -573,7 +576,7 @@ void Decoration::paint(QPainter *painter, const QRect &repaintArea)
     QPalette *g2 = new QPalette(client().data()->color(colorGroup, KDecoration2::ColorRole::TitleBar));
     QColor c2 = client().data()->color(colorGroup, KDecoration2::ColorRole::Frame);
     int leftFrameStart = m_captionRect.height()+leftFrameOffset;
-    int bottom = client().data()->isMaximized() ? side : bottom_;
+    int bottom = getBottom(this);
 
     // left side
     painter->setPen(c2);
@@ -735,8 +738,6 @@ void DecorationButton::paint(QPainter *painter, const QRect &/*repaintArea*/)
 
         painter->drawPixmap( geometry().x(), geometry().y(), btnbg );
 
-    // If we have a decoration bitmap, then draw that
-    // otherwise we paint a sticky button.
         // Select the appropriate button decoration color
         bool darkDeco = qGray( decoration()->client().data()->color(
                 colorGroup,
