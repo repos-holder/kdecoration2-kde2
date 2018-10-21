@@ -1,0 +1,21 @@
+before_script:
+- echo "deb http://us.archive.ubuntu.com/ubuntu/ xenial main" | sudo tee -a /etc/apt/sources.list
+- echo "deb http://us.archive.ubuntu.com/ubuntu/ xenial universe" | sudo tee -a /etc/apt/sources.list
+- sudo apt-get update -qq
+- sudo apt-get install gcc extra-cmake-modules qtbase5-dev libkf5coreaddons-dev libkdecorations2-dev -y
+
+language: cpp
+
+script: cmake . -DCMAKE_INSTALL_PREFIX=build && make install
+
+before_deploy:
+- tar -zcf kdecoration2-kde2.tar.gz build/lib/x86_64-linux-gnu
+
+deploy:
+  provider: releases
+  api_key:
+    secure: FL0qk2DsvQPjkYc5/zSfIB1/sDawKLOtjLpj3mRwSHqrl/EInnREFUeDXSc6LdK4Y867x8/3b5nmd7n8PuBpjbcyMxKQFtJJn06Z8L/jKnn+RjlWt3cWJcw6bys183D5G/6whD0i4N2JJ/bqIAGk9OOgCEccL132NYsxSnFVdT25REY3LCrFgbgxLOnsUIUDfowwUoYP1zrBevRRjVzI59SMY/ZrLXxTGP12lXhyc9OknTncuOgbNnNcG71xtfga4ShdV/tekuKV4Zxy9VT03bwZobPxDUgBl/bzyWctaeXH5mPSjQzbfY/Ev6SqE1aCrzecjIW9AzA1EE6jgUFgLdmph4sjyF3ewXq1r2ek1zTgPTxsu1WhAUrpaz5LoOvMLCUQvv4qpwKMZGK70uKEYvd2gkqsPOfNFkJEwqgUtoZ2t9p/dfG0Du8fjr7EauVYCs2ai8qr5rMJI1tUpR9Y3h1iLs3A2xg+WVjcR8nWD0PIoP1hYyZ4glF5lNnOVA5VWEwOIISSoO+FjEEq6/0YPjmZ8VPgnnV7HhmWba7rUbp34263jGRQQAuS2PS0ieaLnxDJvPUfWTj+mIJ4hPBbPFQ29I3GXYThXCUAlt3SCiulTMoNiiqPfuctnYXiQsg9tEgIZkJLnJanoYP87p0bh9rqzi+3ayDUJlCn8mzxa+M=
+  file: kdecoration2-kde2.tar.gz
+  skip_cleanup: true
+  on:
+    tags: true
