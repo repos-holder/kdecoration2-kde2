@@ -34,6 +34,7 @@
 #include <KPluginFactory>
 
 #include <QPainter>
+#include <QPainterPath>
 #include <QPropertyAnimation>
 
 #include <QtWidgets/qdrawutil.h>
